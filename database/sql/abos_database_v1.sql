@@ -772,3 +772,61 @@ BEFORE UPDATE
 ON activities
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Product Categories
+-- ============================================================
+
+CREATE TABLE product_categories (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    parent_category_id UUID
+        REFERENCES product_categories(id)
+        ON DELETE SET NULL,
+
+    name VARCHAR(255) NOT NULL,
+
+    code VARCHAR(50),
+
+    description TEXT,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_product_category_name
+        UNIQUE(company_id, name),
+
+    CONSTRAINT uq_product_category_code
+        UNIQUE(company_id, code)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_product_categories_company
+ON product_categories(company_id);
+
+CREATE INDEX idx_product_categories_parent
+ON product_categories(parent_category_id);
+
+CREATE INDEX idx_product_categories_active
+ON product_categories(is_active);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_product_categories_updated_at
+BEFORE UPDATE
+ON product_categories
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
