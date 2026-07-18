@@ -1,0 +1,35 @@
+BEGIN;
+
+-- =========================
+-- CHECK Constraints
+-- =========================
+
+ALTER TABLE products
+ADD CONSTRAINT chk_product_price
+CHECK (selling_price >= 0);
+
+ALTER TABLE products
+ADD CONSTRAINT chk_product_cost
+CHECK (cost_price >= 0);
+
+ALTER TABLE customers
+ADD CONSTRAINT chk_customer_credit
+CHECK (credit_limit >= 0);
+
+ALTER TABLE suppliers
+ADD CONSTRAINT chk_supplier_credit
+CHECK (credit_limit >= 0);
+
+ALTER TABLE invoices
+ADD CONSTRAINT chk_invoice_total
+CHECK (total_amount >= 0);
+
+ALTER TABLE purchase_bills
+ADD CONSTRAINT chk_purchase_bill_total
+CHECK (total_amount >= 0);
+
+ALTER TABLE inventory_transactions
+ADD CONSTRAINT chk_inventory_qty
+CHECK (quantity > 0);
+
+COMMIT;
