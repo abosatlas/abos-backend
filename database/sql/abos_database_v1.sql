@@ -1263,3 +1263,100 @@ BEFORE UPDATE
 ON quotation_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Sales Orders
+-- ============================================================
+
+CREATE TABLE sales_orders (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    order_number VARCHAR(50) NOT NULL,
+
+    quotation_id UUID
+        REFERENCES quotations(id)
+        ON DELETE SET NULL,
+
+    customer_id UUID NOT NULL
+        REFERENCES customers(id)
+        ON DELETE RESTRICT,
+
+    contact_id UUID
+        REFERENCES contacts(id)
+        ON DELETE SET NULL,
+
+    sales_person_id UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    order_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    expected_delivery_date DATE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'draft',
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    subtotal NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    shipping_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    total_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    notes TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_sales_order_number
+        UNIQUE(company_id, order_number)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_sales_orders_company
+ON sales_orders(company_id);
+
+CREATE INDEX idx_sales_orders_customer
+ON sales_orders(customer_id);
+
+CREATE INDEX idx_sales_orders_status
+ON sales_orders(status);
+
+CREATE INDEX idx_sales_orders_date
+ON sales_orders(order_date);
+
+CREATE INDEX idx_sales_orders_sales_person
+ON sales_orders(sales_person_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_sales_orders_updated_at
+BEFORE UPDATE
+ON sales_orders
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
