@@ -1877,3 +1877,98 @@ BEFORE UPDATE
 ON warehouse_locations
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- INVENTORY : Inventory Transactions
+-- ============================================================
+
+CREATE TABLE inventory_transactions (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    warehouse_id UUID NOT NULL
+        REFERENCES warehouses(id)
+        ON DELETE RESTRICT,
+
+    location_id UUID
+        REFERENCES warehouse_locations(id)
+        ON DELETE SET NULL,
+
+    product_id UUID NOT NULL
+        REFERENCES products(id)
+        ON DELETE RESTRICT,
+
+    transaction_type VARCHAR(30) NOT NULL,
+
+    reference_type VARCHAR(30),
+
+    reference_id UUID,
+
+    reference_number VARCHAR(100),
+
+    quantity NUMERIC(14,2) NOT NULL,
+
+    unit_cost NUMERIC(14,2) DEFAULT 0,
+
+    total_cost NUMERIC(14,2) DEFAULT 0,
+
+    batch_number VARCHAR(100),
+
+    serial_number VARCHAR(100),
+
+    expiry_date DATE,
+
+    transaction_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    remarks TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_inventory_quantity
+        CHECK (quantity <> 0)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_inventory_company
+ON inventory_transactions(company_id);
+
+CREATE INDEX idx_inventory_product
+ON inventory_transactions(product_id);
+
+CREATE INDEX idx_inventory_warehouse
+ON inventory_transactions(warehouse_id);
+
+CREATE INDEX idx_inventory_location
+ON inventory_transactions(location_id);
+
+CREATE INDEX idx_inventory_transaction_type
+ON inventory_transactions(transaction_type);
+
+CREATE INDEX idx_inventory_reference
+ON inventory_transactions(reference_type, reference_id);
+
+CREATE INDEX idx_inventory_date
+ON inventory_transactions(transaction_date);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_inventory_transactions_updated_at
+BEFORE UPDATE
+ON inventory_transactions
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
