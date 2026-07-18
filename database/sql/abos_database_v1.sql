@@ -1087,3 +1087,106 @@ BEFORE UPDATE
 ON price_list_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Quotations
+-- ============================================================
+
+CREATE TABLE quotations (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    quotation_number VARCHAR(50) NOT NULL,
+
+    customer_id UUID NOT NULL
+        REFERENCES customers(id)
+        ON DELETE RESTRICT,
+
+    contact_id UUID
+        REFERENCES contacts(id)
+        ON DELETE SET NULL,
+
+    opportunity_id UUID
+        REFERENCES opportunities(id)
+        ON DELETE SET NULL,
+
+    price_list_id UUID
+        REFERENCES price_lists(id)
+        ON DELETE SET NULL,
+
+    sales_person_id UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    quotation_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    expiry_date DATE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'draft',
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    subtotal NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    shipping_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    total_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    notes TEXT,
+
+    terms_conditions TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_quotation_number
+        UNIQUE(company_id, quotation_number)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_quotations_company
+ON quotations(company_id);
+
+CREATE INDEX idx_quotations_customer
+ON quotations(customer_id);
+
+CREATE INDEX idx_quotations_status
+ON quotations(status);
+
+CREATE INDEX idx_quotations_date
+ON quotations(quotation_date);
+
+CREATE INDEX idx_quotations_salesperson
+ON quotations(sales_person_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_quotations_updated_at
+BEFORE UPDATE
+ON quotations
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
