@@ -154,3 +154,47 @@ ON roles(company_id);
 
 CREATE INDEX idx_roles_status
 ON roles(status);
+-- ==========================================================
+-- Users
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS users (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+role_id UUID REFERENCES roles(id) ON DELETE SET NULL,
+
+email VARCHAR(255) NOT NULL,
+
+password_hash TEXT NOT NULL,
+
+first_name VARCHAR(100) NOT NULL,
+
+last_name VARCHAR(100),
+
+phone VARCHAR(50),
+
+is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+last_login_at TIMESTAMP,
+
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+UNIQUE(company_id,email)
+
+);
+
+SELECT create_updated_at_trigger('users');
+
+CREATE INDEX idx_users_company
+ON users(company_id);
+
+CREATE INDEX idx_users_role
+ON users(role_id);
+
+CREATE INDEX idx_users_email
+ON users(email);
