@@ -939,3 +939,69 @@ BEFORE UPDATE
 ON products
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Price Lists
+-- ============================================================
+
+CREATE TABLE price_lists (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    name VARCHAR(255) NOT NULL,
+
+    code VARCHAR(50),
+
+    description TEXT,
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+
+    valid_from DATE,
+
+    valid_to DATE,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_price_lists_name
+        UNIQUE(company_id, name),
+
+    CONSTRAINT uq_price_lists_code
+        UNIQUE(company_id, code)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_price_lists_company
+ON price_lists(company_id);
+
+CREATE INDEX idx_price_lists_status
+ON price_lists(status);
+
+CREATE INDEX idx_price_lists_default
+ON price_lists(is_default);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_price_lists_updated_at
+BEFORE UPDATE
+ON price_lists
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
