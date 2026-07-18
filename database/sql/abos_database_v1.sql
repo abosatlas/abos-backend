@@ -2138,3 +2138,94 @@ BEFORE UPDATE
 ON stock_transfer_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- PURCHASING : Suppliers
+-- ============================================================
+
+CREATE TABLE suppliers (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    supplier_number VARCHAR(50) NOT NULL,
+
+    supplier_name VARCHAR(255) NOT NULL,
+
+    supplier_type VARCHAR(30) NOT NULL DEFAULT 'company',
+
+    tax_number VARCHAR(100),
+
+    commercial_register VARCHAR(100),
+
+    email VARCHAR(255),
+
+    phone VARCHAR(50),
+
+    mobile VARCHAR(50),
+
+    website VARCHAR(255),
+
+    country VARCHAR(100),
+
+    governorate VARCHAR(100),
+
+    city VARCHAR(100),
+
+    address TEXT,
+
+    postal_code VARCHAR(20),
+
+    payment_terms INTEGER DEFAULT 0,
+
+    credit_limit NUMERIC(14,2) DEFAULT 0,
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
+
+    notes TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_supplier_number
+        UNIQUE(company_id, supplier_number),
+
+    CONSTRAINT uq_supplier_name
+        UNIQUE(company_id, supplier_name)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_suppliers_company
+ON suppliers(company_id);
+
+CREATE INDEX idx_suppliers_number
+ON suppliers(supplier_number);
+
+CREATE INDEX idx_suppliers_name
+ON suppliers(supplier_name);
+
+CREATE INDEX idx_suppliers_status
+ON suppliers(status);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_suppliers_updated_at
+BEFORE UPDATE
+ON suppliers
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
