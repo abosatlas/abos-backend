@@ -89,3 +89,39 @@ SELECT create_updated_at_trigger('branches');
 
 CREATE INDEX idx_branches_company
 ON branches(company_id);
+-- ==========================================================
+-- Departments
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS departments (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,
+
+name VARCHAR(200) NOT NULL,
+
+code VARCHAR(50),
+
+description TEXT,
+
+status status_type NOT NULL DEFAULT 'active',
+
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+
+);
+
+SELECT create_updated_at_trigger('departments');
+
+CREATE INDEX idx_departments_company
+ON departments(company_id);
+
+CREATE INDEX idx_departments_branch
+ON departments(branch_id);
+
+CREATE INDEX idx_departments_status
+ON departments(status);
