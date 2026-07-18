@@ -392,3 +392,142 @@ CREATE TRIGGER trg_contacts_updated_at
 BEFORE UPDATE ON contacts
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- CRM : Leads
+-- ============================================================
+
+CREATE TABLE leads (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    assigned_to UUID REFERENCES users(id),
+
+    first_name VARCHAR(100),
+
+    last_name VARCHAR(100),
+
+    company_name VARCHAR(255),
+
+    email VARCHAR(255),
+
+    phone VARCHAR(50),
+
+    source VARCHAR(100),
+
+    status VARCHAR(30) DEFAULT 'new',
+
+    estimated_value NUMERIC(14,2) DEFAULT 0,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_leads_company
+ON leads(company_id);
+
+CREATE INDEX idx_leads_status
+ON leads(status);
+
+CREATE TRIGGER trg_leads_updated_at
+BEFORE UPDATE
+ON leads
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- CRM : Opportunities
+-- ============================================================
+
+CREATE TABLE opportunities (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    customer_id UUID REFERENCES customers(id),
+
+    lead_id UUID REFERENCES leads(id),
+
+    assigned_to UUID REFERENCES users(id),
+
+    title VARCHAR(255) NOT NULL,
+
+    stage VARCHAR(50) DEFAULT 'qualification',
+
+    probability INTEGER DEFAULT 10,
+
+    expected_revenue NUMERIC(14,2) DEFAULT 0,
+
+    expected_close_date DATE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_opportunities_company
+ON opportunities(company_id);
+
+CREATE INDEX idx_opportunities_stage
+ON opportunities(stage);
+
+CREATE TRIGGER trg_opportunities_updated_at
+BEFORE UPDATE
+ON opportunities
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- CRM : Activities
+-- ============================================================
+
+CREATE TABLE activities (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    customer_id UUID REFERENCES customers(id),
+
+    lead_id UUID REFERENCES leads(id),
+
+    opportunity_id UUID REFERENCES opportunities(id),
+
+    user_id UUID REFERENCES users(id),
+
+    activity_type VARCHAR(50),
+
+    subject VARCHAR(255),
+
+    description TEXT,
+
+    activity_date TIMESTAMPTZ,
+
+    status VARCHAR(30) DEFAULT 'planned',
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_activities_company
+ON activities(company_id);
+
+CREATE INDEX idx_activities_user
+ON activities(user_id);
+
+CREATE TRIGGER trg_activities_updated_at
+BEFORE UPDATE
+ON activities
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
