@@ -253,3 +253,4 @@ ON employees(department_id);
 
 CREATE INDEX idx_employees_user
 ON employees(user_id);
+COMMIT;
