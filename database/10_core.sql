@@ -125,3 +125,32 @@ ON departments(branch_id);
 
 CREATE INDEX idx_departments_status
 ON departments(status);
+-- ==========================================================
+-- Roles
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS roles (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+name VARCHAR(150) NOT NULL,
+
+description TEXT,
+
+status status_type NOT NULL DEFAULT 'active',
+
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+
+);
+
+SELECT create_updated_at_trigger('roles');
+
+CREATE INDEX idx_roles_company
+ON roles(company_id);
+
+CREATE INDEX idx_roles_status
+ON roles(status);
