@@ -668,3 +668,107 @@ BEFORE UPDATE
 ON opportunities
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- CRM : Activities
+-- ============================================================
+
+CREATE TABLE activities (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    customer_id UUID
+        REFERENCES customers(id)
+        ON DELETE SET NULL,
+
+    contact_id UUID
+        REFERENCES contacts(id)
+        ON DELETE SET NULL,
+
+    lead_id UUID
+        REFERENCES leads(id)
+        ON DELETE SET NULL,
+
+    opportunity_id UUID
+        REFERENCES opportunities(id)
+        ON DELETE SET NULL,
+
+    assigned_to UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    activity_type VARCHAR(30) NOT NULL,
+
+    subject VARCHAR(255) NOT NULL,
+
+    description TEXT,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'planned',
+
+    priority VARCHAR(20) NOT NULL DEFAULT 'medium',
+
+    start_at TIMESTAMPTZ,
+
+    end_at TIMESTAMPTZ,
+
+    completed_at TIMESTAMPTZ,
+
+    reminder_at TIMESTAMPTZ,
+
+    location VARCHAR(255),
+
+    outcome TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_activities_company
+ON activities(company_id);
+
+CREATE INDEX idx_activities_customer
+ON activities(customer_id);
+
+CREATE INDEX idx_activities_contact
+ON activities(contact_id);
+
+CREATE INDEX idx_activities_lead
+ON activities(lead_id);
+
+CREATE INDEX idx_activities_opportunity
+ON activities(opportunity_id);
+
+CREATE INDEX idx_activities_assigned
+ON activities(assigned_to);
+
+CREATE INDEX idx_activities_status
+ON activities(status);
+
+CREATE INDEX idx_activities_type
+ON activities(activity_type);
+
+CREATE INDEX idx_activities_start_at
+ON activities(start_at);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_activities_updated_at
+BEFORE UPDATE
+ON activities
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
