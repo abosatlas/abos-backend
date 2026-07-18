@@ -1972,3 +1972,83 @@ BEFORE UPDATE
 ON inventory_transactions
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- INVENTORY : Stock Transfers
+-- ============================================================
+
+CREATE TABLE stock_transfers (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    transfer_number VARCHAR(50) NOT NULL,
+
+    from_warehouse_id UUID NOT NULL
+        REFERENCES warehouses(id)
+        ON DELETE RESTRICT,
+
+    to_warehouse_id UUID NOT NULL
+        REFERENCES warehouses(id)
+        ON DELETE RESTRICT,
+
+    requested_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    transfer_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    expected_receipt_date DATE,
+
+    received_date DATE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'draft',
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_stock_transfer_number
+        UNIQUE(company_id, transfer_number),
+
+    CONSTRAINT chk_different_warehouses
+        CHECK (from_warehouse_id <> to_warehouse_id)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_stock_transfers_company
+ON stock_transfers(company_id);
+
+CREATE INDEX idx_stock_transfers_from
+ON stock_transfers(from_warehouse_id);
+
+CREATE INDEX idx_stock_transfers_to
+ON stock_transfers(to_warehouse_id);
+
+CREATE INDEX idx_stock_transfers_status
+ON stock_transfers(status);
+
+CREATE INDEX idx_stock_transfers_date
+ON stock_transfers(transfer_date);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_stock_transfers_updated_at
+BEFORE UPDATE
+ON stock_transfers
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
