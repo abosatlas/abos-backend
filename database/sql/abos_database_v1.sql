@@ -1360,3 +1360,84 @@ BEFORE UPDATE
 ON sales_orders
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Sales Order Items
+-- ============================================================
+
+CREATE TABLE sales_order_items (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    sales_order_id UUID NOT NULL
+        REFERENCES sales_orders(id)
+        ON DELETE CASCADE,
+
+    product_id UUID
+        REFERENCES products(id)
+        ON DELETE SET NULL,
+
+    quotation_item_id UUID
+        REFERENCES quotation_items(id)
+        ON DELETE SET NULL,
+
+    line_no INTEGER NOT NULL,
+
+    description TEXT,
+
+    quantity NUMERIC(14,2) NOT NULL DEFAULT 1,
+
+    unit VARCHAR(50) NOT NULL DEFAULT 'Piece',
+
+    unit_price NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_rate NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    line_total NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    delivered_quantity NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    invoiced_quantity NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_sales_order_item_line
+        UNIQUE(sales_order_id, line_no)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_sales_order_items_company
+ON sales_order_items(company_id);
+
+CREATE INDEX idx_sales_order_items_order
+ON sales_order_items(sales_order_id);
+
+CREATE INDEX idx_sales_order_items_product
+ON sales_order_items(product_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_sales_order_items_updated_at
+BEFORE UPDATE
+ON sales_order_items
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
