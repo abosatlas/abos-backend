@@ -2052,3 +2052,89 @@ BEFORE UPDATE
 ON stock_transfers
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- INVENTORY : Stock Transfer Items
+-- ============================================================
+
+CREATE TABLE stock_transfer_items (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    stock_transfer_id UUID NOT NULL
+        REFERENCES stock_transfers(id)
+        ON DELETE CASCADE,
+
+    product_id UUID NOT NULL
+        REFERENCES products(id)
+        ON DELETE RESTRICT,
+
+    from_location_id UUID
+        REFERENCES warehouse_locations(id)
+        ON DELETE SET NULL,
+
+    to_location_id UUID
+        REFERENCES warehouse_locations(id)
+        ON DELETE SET NULL,
+
+    line_no INTEGER NOT NULL,
+
+    requested_quantity NUMERIC(14,2) NOT NULL,
+
+    shipped_quantity NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    received_quantity NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    unit VARCHAR(50) NOT NULL DEFAULT 'Piece',
+
+    remarks TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_stock_transfer_item
+        UNIQUE(stock_transfer_id, line_no),
+
+    CONSTRAINT chk_requested_qty
+        CHECK (requested_quantity > 0),
+
+    CONSTRAINT chk_shipped_qty
+        CHECK (shipped_quantity >= 0),
+
+    CONSTRAINT chk_received_qty
+        CHECK (received_quantity >= 0)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_stock_transfer_items_company
+ON stock_transfer_items(company_id);
+
+CREATE INDEX idx_stock_transfer_items_transfer
+ON stock_transfer_items(stock_transfer_id);
+
+CREATE INDEX idx_stock_transfer_items_product
+ON stock_transfer_items(product_id);
+
+CREATE INDEX idx_stock_transfer_items_from_location
+ON stock_transfer_items(from_location_id);
+
+CREATE INDEX idx_stock_transfer_items_to_location
+ON stock_transfer_items(to_location_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_stock_transfer_items_updated_at
+BEFORE UPDATE
+ON stock_transfer_items
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
