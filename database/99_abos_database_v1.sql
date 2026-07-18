@@ -13,10 +13,11 @@
 \i 80_projects.sql
 \i 90_assets.sql
 
-\i 95_views.sql
-\i 96_rls.sql
-\i 97_seed.sql
+\i 91_constraints.sql
 \i 92_audit.sql
 \i 93_financial_views.sql
 \i 94_dashboard_views.sql
+\i 95_views.sql
+\i 96_rls.sql
+\i 97_seed.sql
 \i 98_indexes.sql
