@@ -1718,3 +1718,85 @@ BEFORE UPDATE
 ON payments
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- INVENTORY : Warehouses
+-- ============================================================
+
+CREATE TABLE warehouses (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    branch_id UUID
+        REFERENCES branches(id)
+        ON DELETE SET NULL,
+
+    warehouse_code VARCHAR(50) NOT NULL,
+
+    warehouse_name VARCHAR(255) NOT NULL,
+
+    warehouse_type VARCHAR(30) NOT NULL DEFAULT 'main',
+
+    manager_id UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    phone VARCHAR(50),
+
+    email VARCHAR(255),
+
+    country VARCHAR(100),
+
+    governorate VARCHAR(100),
+
+    city VARCHAR(100),
+
+    address TEXT,
+
+    postal_code VARCHAR(20),
+
+    latitude NUMERIC(10,7),
+
+    longitude NUMERIC(10,7),
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_warehouse_code
+        UNIQUE(company_id, warehouse_code)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_warehouses_company
+ON warehouses(company_id);
+
+CREATE INDEX idx_warehouses_branch
+ON warehouses(branch_id);
+
+CREATE INDEX idx_warehouses_manager
+ON warehouses(manager_id);
+
+CREATE INDEX idx_warehouses_active
+ON warehouses(is_active);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_warehouses_updated_at
+BEFORE UPDATE
+ON warehouses
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
