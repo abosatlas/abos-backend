@@ -1190,3 +1190,76 @@ BEFORE UPDATE
 ON quotations
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Quotation Items
+-- ============================================================
+
+CREATE TABLE quotation_items (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    quotation_id UUID NOT NULL
+        REFERENCES quotations(id)
+        ON DELETE CASCADE,
+
+    product_id UUID
+        REFERENCES products(id)
+        ON DELETE SET NULL,
+
+    line_no INTEGER NOT NULL,
+
+    description TEXT,
+
+    quantity NUMERIC(14,2) NOT NULL DEFAULT 1,
+
+    unit VARCHAR(50) NOT NULL DEFAULT 'Piece',
+
+    unit_price NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_rate NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    line_total NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_quotation_item_line
+        UNIQUE(quotation_id, line_no)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_quotation_items_company
+ON quotation_items(company_id);
+
+CREATE INDEX idx_quotation_items_quotation
+ON quotation_items(quotation_id);
+
+CREATE INDEX idx_quotation_items_product
+ON quotation_items(product_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_quotation_items_updated_at
+BEFORE UPDATE
+ON quotation_items
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
