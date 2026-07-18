@@ -1,7 +1,4 @@
--- ==========================================================
--- ABOS ERP v1
--- ENUM Types
--- ==========================================================
+BEGIN;
 
 CREATE TYPE status_type AS ENUM (
 'active',
@@ -10,44 +7,48 @@ CREATE TYPE status_type AS ENUM (
 'pending',
 'approved',
 'rejected',
-'completed',
-'cancelled'
+'cancelled',
+'completed'
 );
 
 CREATE TYPE customer_type AS ENUM (
-'individual',
-'company'
+'company',
+'individual'
 );
 
 CREATE TYPE supplier_type AS ENUM (
-'individual',
-'company'
+'company',
+'individual'
 );
 
 CREATE TYPE payment_status AS ENUM (
-'unpaid',
+'pending',
 'partial',
 'paid',
-'overdue'
+'cancelled',
+'refunded'
 );
 
 CREATE TYPE payment_method AS ENUM (
 'cash',
 'bank_transfer',
-'credit_card',
 'cheque',
-'wallet'
+'credit_card',
+'debit_card',
+'wallet',
+'online'
 );
 
 CREATE TYPE inventory_transaction_type AS ENUM (
-'opening_balance',
+'opening',
 'purchase',
 'sale',
-'sales_return',
-'purchase_return',
+'return_in',
+'return_out',
+'adjustment_in',
+'adjustment_out',
 'transfer_in',
 'transfer_out',
-'adjustment',
 'production_in',
 'production_out'
 );
@@ -71,7 +72,10 @@ CREATE TYPE opportunity_stage AS ENUM (
 
 CREATE TYPE invoice_status AS ENUM (
 'draft',
-'sent',
+'issued',
+'partially_paid',
 'paid',
 'cancelled'
 );
+
+COMMIT;
