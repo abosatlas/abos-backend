@@ -55,3 +55,37 @@ ON companies(code);
 
 CREATE INDEX idx_companies_status
 ON companies(status);
+-- ==========================================================
+-- Branches
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS branches (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+name VARCHAR(200) NOT NULL,
+
+code VARCHAR(50),
+
+phone VARCHAR(50),
+
+email VARCHAR(255),
+
+address TEXT,
+
+manager_name VARCHAR(200),
+
+status status_type NOT NULL DEFAULT 'active',
+
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+
+);
+
+SELECT create_updated_at_trigger('branches');
+
+CREATE INDEX idx_branches_company
+ON branches(company_id);
