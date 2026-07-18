@@ -830,3 +830,112 @@ BEFORE UPDATE
 ON product_categories
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Products
+-- ============================================================
+
+CREATE TABLE products (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    category_id UUID
+        REFERENCES product_categories(id)
+        ON DELETE SET NULL,
+
+    sku VARCHAR(100) NOT NULL,
+
+    barcode VARCHAR(100),
+
+    name_ar VARCHAR(255) NOT NULL,
+
+    name_en VARCHAR(255),
+
+    short_description TEXT,
+
+    description TEXT,
+
+    unit VARCHAR(50) NOT NULL DEFAULT 'Piece',
+
+    product_type VARCHAR(30) NOT NULL DEFAULT 'product',
+
+    cost_price NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    selling_price NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_rate NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    track_inventory BOOLEAN NOT NULL DEFAULT TRUE,
+
+    current_stock NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    minimum_stock NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    maximum_stock NUMERIC(14,2),
+
+    reorder_level NUMERIC(14,2) DEFAULT 0,
+
+    weight NUMERIC(10,3),
+
+    length NUMERIC(10,2),
+
+    width NUMERIC(10,2),
+
+    height NUMERIC(10,2),
+
+    image_url TEXT,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_products_sku
+        UNIQUE(company_id, sku),
+
+    CONSTRAINT uq_products_barcode
+        UNIQUE(company_id, barcode)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_products_company
+ON products(company_id);
+
+CREATE INDEX idx_products_category
+ON products(category_id);
+
+CREATE INDEX idx_products_name_ar
+ON products(name_ar);
+
+CREATE INDEX idx_products_name_en
+ON products(name_en);
+
+CREATE INDEX idx_products_active
+ON products(is_active);
+
+CREATE INDEX idx_products_inventory
+ON products(track_inventory);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_products_updated_at
+BEFORE UPDATE
+ON products
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
