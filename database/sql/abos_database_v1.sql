@@ -1800,3 +1800,80 @@ BEFORE UPDATE
 ON warehouses
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- INVENTORY : Warehouse Locations
+-- ============================================================
+
+CREATE TABLE warehouse_locations (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    warehouse_id UUID NOT NULL
+        REFERENCES warehouses(id)
+        ON DELETE CASCADE,
+
+    parent_location_id UUID
+        REFERENCES warehouse_locations(id)
+        ON DELETE SET NULL,
+
+    location_code VARCHAR(100) NOT NULL,
+
+    location_name VARCHAR(255) NOT NULL,
+
+    location_type VARCHAR(30) NOT NULL DEFAULT 'bin',
+
+    capacity NUMERIC(14,2),
+
+    current_utilization NUMERIC(14,2) DEFAULT 0,
+
+    is_pickable BOOLEAN NOT NULL DEFAULT TRUE,
+
+    is_receiving BOOLEAN NOT NULL DEFAULT FALSE,
+
+    is_shipping BOOLEAN NOT NULL DEFAULT FALSE,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_location_code
+        UNIQUE(company_id, warehouse_id, location_code)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_locations_company
+ON warehouse_locations(company_id);
+
+CREATE INDEX idx_locations_warehouse
+ON warehouse_locations(warehouse_id);
+
+CREATE INDEX idx_locations_parent
+ON warehouse_locations(parent_location_id);
+
+CREATE INDEX idx_locations_type
+ON warehouse_locations(location_type);
+
+CREATE INDEX idx_locations_active
+ON warehouse_locations(is_active);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_locations_updated_at
+BEFORE UPDATE
+ON warehouse_locations
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
