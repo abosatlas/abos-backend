@@ -1550,3 +1550,81 @@ BEFORE UPDATE
 ON invoices
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Invoice Items
+-- ============================================================
+
+CREATE TABLE invoice_items (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    invoice_id UUID NOT NULL
+        REFERENCES invoices(id)
+        ON DELETE CASCADE,
+
+    sales_order_item_id UUID
+        REFERENCES sales_order_items(id)
+        ON DELETE SET NULL,
+
+    product_id UUID
+        REFERENCES products(id)
+        ON DELETE RESTRICT,
+
+    line_no INTEGER NOT NULL,
+
+    description TEXT,
+
+    quantity NUMERIC(14,2) NOT NULL DEFAULT 1,
+
+    unit VARCHAR(50) NOT NULL DEFAULT 'Piece',
+
+    unit_price NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_rate NUMERIC(5,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    line_total NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_invoice_item_line
+        UNIQUE(invoice_id, line_no)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_invoice_items_company
+ON invoice_items(company_id);
+
+CREATE INDEX idx_invoice_items_invoice
+ON invoice_items(invoice_id);
+
+CREATE INDEX idx_invoice_items_product
+ON invoice_items(product_id);
+
+CREATE INDEX idx_invoice_items_sales_order_item
+ON invoice_items(sales_order_item_id);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_invoice_items_updated_at
+BEFORE UPDATE
+ON invoice_items
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
