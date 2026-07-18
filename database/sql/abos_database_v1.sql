@@ -83,3 +83,117 @@ ON companies
 FOR EACH ROW
 
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- Branches
+-- ============================================================
+
+CREATE TABLE branches (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    name VARCHAR(200) NOT NULL,
+
+    code VARCHAR(50),
+
+    phone VARCHAR(50),
+
+    email VARCHAR(200),
+
+    address TEXT,
+
+    manager_name VARCHAR(200),
+
+    is_active BOOLEAN DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_branches_company
+ON branches(company_id);
+
+CREATE TRIGGER trg_branches_updated_at
+
+BEFORE UPDATE
+ON branches
+
+FOR EACH ROW
+
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- Departments
+-- ============================================================
+
+CREATE TABLE departments (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,
+
+    name VARCHAR(200) NOT NULL,
+
+    description TEXT,
+
+    is_active BOOLEAN DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_departments_company
+ON departments(company_id);
+
+CREATE INDEX idx_departments_branch
+ON departments(branch_id);
+
+CREATE TRIGGER trg_departments_updated_at
+
+BEFORE UPDATE
+ON departments
+
+FOR EACH ROW
+
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- Roles
+-- ============================================================
+
+CREATE TABLE roles (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    name VARCHAR(150) NOT NULL,
+
+    description TEXT,
+
+    is_system BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_roles_company
+ON roles(company_id);
+
+CREATE TRIGGER trg_roles_updated_at
+
+BEFORE UPDATE
+ON roles
+
+FOR EACH ROW
+
+EXECUTE FUNCTION update_updated_at();
