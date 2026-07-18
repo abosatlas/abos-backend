@@ -531,3 +531,69 @@ BEFORE UPDATE
 ON activities
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- CRM : Leads
+-- ============================================================
+
+CREATE TABLE leads (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    assigned_to UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    customer_id UUID
+        REFERENCES customers(id)
+        ON DELETE SET NULL,
+
+    first_name VARCHAR(100),
+
+    last_name VARCHAR(100),
+
+    company_name VARCHAR(255),
+
+    job_title VARCHAR(150),
+
+    email VARCHAR(255),
+
+    phone VARCHAR(50),
+
+    mobile VARCHAR(50),
+
+    source VARCHAR(100),
+
+    status VARCHAR(30) NOT NULL DEFAULT 'new',
+
+    priority VARCHAR(20) DEFAULT 'medium',
+
+    estimated_value NUMERIC(14,2) DEFAULT 0,
+
+    expected_close_date DATE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_leads_company
+ON leads(company_id);
+
+CREATE INDEX idx_leads_status
+ON leads(status);
+
+CREATE INDEX idx_leads_assigned
+ON leads(assigned_to);
+
+CREATE TRIGGER trg_leads_updated_at
+BEFORE UPDATE
+ON leads
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
