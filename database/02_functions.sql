@@ -68,3 +68,34 @@ current_setting('app.current_user', TRUE),
 ''
 )::UUID;
 $$;
+CREATE OR REPLACE FUNCTION generate_code(prefix TEXT)
+
+RETURNS TEXT
+
+LANGUAGE plpgsql
+
+AS $$
+
+DECLARE
+
+v_code TEXT;
+
+BEGIN
+
+v_code :=
+
+prefix ||
+
+'-' ||
+
+TO_CHAR(NOW(),'YYYYMMDD') ||
+
+'-' ||
+
+LPAD(FLOOR(RANDOM()*100000)::TEXT,5,'0');
+
+RETURN v_code;
+
+END;
+
+$$;
