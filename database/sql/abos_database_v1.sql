@@ -597,3 +597,74 @@ BEFORE UPDATE
 ON leads
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- CRM : Opportunities
+-- ============================================================
+
+CREATE TABLE opportunities (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    customer_id UUID
+        REFERENCES customers(id)
+        ON DELETE SET NULL,
+
+    lead_id UUID
+        REFERENCES leads(id)
+        ON DELETE SET NULL,
+
+    owner_id UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    opportunity_number VARCHAR(50),
+
+    title VARCHAR(255) NOT NULL,
+
+    description TEXT,
+
+    stage VARCHAR(50) NOT NULL DEFAULT 'qualification',
+
+    probability INTEGER NOT NULL DEFAULT 10
+        CHECK (probability BETWEEN 0 AND 100),
+
+    expected_revenue NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    expected_close_date DATE,
+
+    actual_close_date DATE,
+
+    status VARCHAR(30) DEFAULT 'open',
+
+    lost_reason TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_opportunities_company
+ON opportunities(company_id);
+
+CREATE INDEX idx_opportunities_customer
+ON opportunities(customer_id);
+
+CREATE INDEX idx_opportunities_lead
+ON opportunities(lead_id);
+
+CREATE INDEX idx_opportunities_owner
+ON opportunities(owner_id);
+
+CREATE INDEX idx_opportunities_stage
+ON opportunities(stage);
+
+CREATE TRIGGER trg_opportunities_updated_at
+BEFORE UPDATE
+ON opportunities
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
