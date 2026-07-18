@@ -99,3 +99,45 @@ RETURN v_code;
 END;
 
 $$;
+CREATE OR REPLACE FUNCTION calculate_inventory_balance(
+
+p_company UUID,
+
+p_product UUID,
+
+p_warehouse UUID
+
+)
+
+RETURNS NUMERIC
+
+LANGUAGE SQL
+
+AS $$
+
+SELECT COALESCE(
+
+SUM(
+
+CASE
+
+WHEN transaction_type IN
+('opening','purchase','adjustment_in','transfer_in','production_in','return_in')
+
+THEN quantity
+
+ELSE -quantity
+
+END
+
+),0)
+
+FROM inventory_transactions
+
+WHERE company_id=p_company
+
+AND warehouse_id=p_warehouse
+
+AND product_id=p_product;
+
+$$;
