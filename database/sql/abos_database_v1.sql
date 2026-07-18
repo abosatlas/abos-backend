@@ -197,3 +197,96 @@ ON roles
 FOR EACH ROW
 
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- Users
+-- ============================================================
+
+CREATE TABLE users (
+
+    id UUID PRIMARY KEY,
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,
+
+    department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
+
+    role_id UUID REFERENCES roles(id) ON DELETE SET NULL,
+
+    first_name VARCHAR(100) NOT NULL,
+
+    last_name VARCHAR(100),
+
+    email VARCHAR(255) NOT NULL,
+
+    phone VARCHAR(50),
+
+    job_title VARCHAR(150),
+
+    avatar_url TEXT,
+
+    is_active BOOLEAN DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(company_id, email)
+
+);
+
+CREATE INDEX idx_users_company
+ON users(company_id);
+
+CREATE INDEX idx_users_email
+ON users(email);
+
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- Employees
+-- ============================================================
+
+CREATE TABLE employees (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+
+    employee_code VARCHAR(50),
+
+    national_id VARCHAR(50),
+
+    hire_date DATE,
+
+    birth_date DATE,
+
+    salary NUMERIC(12,2),
+
+    employment_status VARCHAR(50) DEFAULT 'active',
+
+    emergency_contact_name VARCHAR(200),
+
+    emergency_contact_phone VARCHAR(50),
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_employees_company
+ON employees(company_id);
+
+CREATE INDEX idx_employees_user
+ON employees(user_id);
+
+CREATE TRIGGER trg_employees_updated_at
+BEFORE UPDATE ON employees
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
