@@ -198,3 +198,58 @@ ON users(role_id);
 
 CREATE INDEX idx_users_email
 ON users(email);
+-- ==========================================================
+-- Employees
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS employees (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,
+
+department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
+
+user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+
+employee_number VARCHAR(50),
+
+first_name VARCHAR(100) NOT NULL,
+
+last_name VARCHAR(100),
+
+national_id VARCHAR(50),
+
+email VARCHAR(255),
+
+phone VARCHAR(50),
+
+hire_date DATE,
+
+job_title VARCHAR(150),
+
+salary NUMERIC(18,2),
+
+status status_type NOT NULL DEFAULT 'active',
+
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+
+);
+
+SELECT create_updated_at_trigger('employees');
+
+CREATE INDEX idx_employees_company
+ON employees(company_id);
+
+CREATE INDEX idx_employees_branch
+ON employees(branch_id);
+
+CREATE INDEX idx_employees_department
+ON employees(department_id);
+
+CREATE INDEX idx_employees_user
+ON employees(user_id);
