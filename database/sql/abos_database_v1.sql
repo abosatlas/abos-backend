@@ -1628,3 +1628,93 @@ BEFORE UPDATE
 ON invoice_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- FINANCE : Payments
+-- ============================================================
+
+CREATE TABLE payments (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    invoice_id UUID NOT NULL
+        REFERENCES invoices(id)
+        ON DELETE CASCADE,
+
+    customer_id UUID NOT NULL
+        REFERENCES customers(id)
+        ON DELETE RESTRICT,
+
+    payment_number VARCHAR(50) NOT NULL,
+
+    payment_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    payment_method VARCHAR(30) NOT NULL,
+
+    amount NUMERIC(14,2) NOT NULL,
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    exchange_rate NUMERIC(14,6) NOT NULL DEFAULT 1,
+
+    reference_number VARCHAR(100),
+
+    bank_name VARCHAR(255),
+
+    transaction_number VARCHAR(255),
+
+    status VARCHAR(30) NOT NULL DEFAULT 'completed',
+
+    notes TEXT,
+
+    received_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_payment_number
+        UNIQUE(company_id, payment_number)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_payments_company
+ON payments(company_id);
+
+CREATE INDEX idx_payments_invoice
+ON payments(invoice_id);
+
+CREATE INDEX idx_payments_customer
+ON payments(customer_id);
+
+CREATE INDEX idx_payments_date
+ON payments(payment_date);
+
+CREATE INDEX idx_payments_status
+ON payments(status);
+
+CREATE INDEX idx_payments_method
+ON payments(payment_method);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_payments_updated_at
+BEFORE UPDATE
+ON payments
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
