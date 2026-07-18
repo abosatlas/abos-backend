@@ -1005,3 +1005,85 @@ BEFORE UPDATE
 ON price_lists
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Price List Items
+-- ============================================================
+
+CREATE TABLE price_list_items (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    price_list_id UUID NOT NULL
+        REFERENCES price_lists(id)
+        ON DELETE CASCADE,
+
+    product_id UUID NOT NULL
+        REFERENCES products(id)
+        ON DELETE CASCADE,
+
+    unit VARCHAR(50) DEFAULT 'Piece',
+
+    price NUMERIC(14,2) NOT NULL,
+
+    discount_type VARCHAR(20) DEFAULT 'fixed',
+
+    discount_value NUMERIC(14,2) DEFAULT 0,
+
+    minimum_quantity NUMERIC(14,2) DEFAULT 1,
+
+    maximum_quantity NUMERIC(14,2),
+
+    tax_rate NUMERIC(5,2) DEFAULT 0,
+
+    tax_included BOOLEAN DEFAULT TRUE,
+
+    valid_from DATE,
+
+    valid_to DATE,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    notes TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_price_list_product
+        UNIQUE(price_list_id, product_id, unit)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_price_list_items_company
+ON price_list_items(company_id);
+
+CREATE INDEX idx_price_list_items_price_list
+ON price_list_items(price_list_id);
+
+CREATE INDEX idx_price_list_items_product
+ON price_list_items(product_id);
+
+CREATE INDEX idx_price_list_items_active
+ON price_list_items(is_active);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_price_list_items_updated_at
+BEFORE UPDATE
+ON price_list_items
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
