@@ -1441,3 +1441,112 @@ BEFORE UPDATE
 ON sales_order_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- SALES : Invoices
+-- ============================================================
+
+CREATE TABLE invoices (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    invoice_number VARCHAR(50) NOT NULL,
+
+    sales_order_id UUID
+        REFERENCES sales_orders(id)
+        ON DELETE SET NULL,
+
+    customer_id UUID NOT NULL
+        REFERENCES customers(id)
+        ON DELETE RESTRICT,
+
+    contact_id UUID
+        REFERENCES contacts(id)
+        ON DELETE SET NULL,
+
+    sales_person_id UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    invoice_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    due_date DATE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'draft',
+
+    payment_status VARCHAR(30) NOT NULL DEFAULT 'unpaid',
+
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    subtotal NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    discount_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    tax_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    shipping_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    total_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    paid_amount NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    balance_due NUMERIC(14,2) NOT NULL DEFAULT 0,
+
+    notes TEXT,
+
+    created_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_by UUID
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    approved_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_invoice_number
+        UNIQUE(company_id, invoice_number)
+
+);
+
+-- ============================================================
+-- Indexes
+-- ============================================================
+
+CREATE INDEX idx_invoices_company
+ON invoices(company_id);
+
+CREATE INDEX idx_invoices_customer
+ON invoices(customer_id);
+
+CREATE INDEX idx_invoices_sales_order
+ON invoices(sales_order_id);
+
+CREATE INDEX idx_invoices_status
+ON invoices(status);
+
+CREATE INDEX idx_invoices_payment_status
+ON invoices(payment_status);
+
+CREATE INDEX idx_invoices_invoice_date
+ON invoices(invoice_date);
+
+CREATE INDEX idx_invoices_due_date
+ON invoices(due_date);
+
+-- ============================================================
+-- Trigger
+-- ============================================================
+
+CREATE TRIGGER trg_invoices_updated_at
+BEFORE UPDATE
+ON invoices
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
