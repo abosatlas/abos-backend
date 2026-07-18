@@ -290,3 +290,105 @@ CREATE TRIGGER trg_employees_updated_at
 BEFORE UPDATE ON employees
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+-- ============================================================
+-- CRM : Customers
+-- ============================================================
+
+CREATE TABLE customers (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    customer_code VARCHAR(50),
+
+    name VARCHAR(255) NOT NULL,
+
+    customer_type VARCHAR(50) DEFAULT 'company',
+
+    tax_number VARCHAR(100),
+
+    commercial_registration VARCHAR(100),
+
+    email VARCHAR(255),
+
+    phone VARCHAR(50),
+
+    mobile VARCHAR(50),
+
+    website VARCHAR(255),
+
+    country VARCHAR(100),
+
+    city VARCHAR(100),
+
+    address TEXT,
+
+    credit_limit NUMERIC(14,2) DEFAULT 0,
+
+    current_balance NUMERIC(14,2) DEFAULT 0,
+
+    payment_terms INTEGER DEFAULT 30,
+
+    status VARCHAR(30) DEFAULT 'active',
+
+    notes TEXT,
+
+    created_by UUID REFERENCES users(id),
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_customers_company
+ON customers(company_id);
+
+CREATE INDEX idx_customers_name
+ON customers(name);
+
+CREATE TRIGGER trg_customers_updated_at
+BEFORE UPDATE ON customers
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- CRM : Contacts
+-- ============================================================
+
+CREATE TABLE contacts (
+
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+
+    full_name VARCHAR(255) NOT NULL,
+
+    job_title VARCHAR(150),
+
+    email VARCHAR(255),
+
+    phone VARCHAR(50),
+
+    mobile VARCHAR(50),
+
+    is_primary BOOLEAN DEFAULT FALSE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+
+);
+
+CREATE INDEX idx_contacts_customer
+ON contacts(customer_id);
+
+CREATE TRIGGER trg_contacts_updated_at
+BEFORE UPDATE ON contacts
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
